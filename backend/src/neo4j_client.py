@@ -8,6 +8,9 @@ import asyncio
 from langchain.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain.chains import LLMChain
+from llm.get_llm import get_embedding_function, get_model_function
+
+
 load_dotenv()
 
 # Configure logging
@@ -28,18 +31,19 @@ def summarize_chunk(chunk_content):
         input_variables=["chunk"],
         template="""
         Hãy tóm tắt nội dung sau đây thành một đoạn ngắn gọn và dễ hiểu:
-        
+
         Nội dung: {chunk}
-        
+
         Tóm tắt:
         """
     )
 
     summarize_chain = prompt_template | llm
 
-    summary = summarize_chain.invoke({"chunk": chunk_content})
+    summary_message = summarize_chain.invoke({"chunk": chunk_content}) # Lưu kết quả invoke vào biến summary_message
+    summary_text = summary_message.content # Lấy nội dung text từ AIMessage
 
-    return summary.strip()
+    return summary_text.strip() # Gọi strip() trên summary_text
 
 class Neo4jClient:
     def __init__(self, uri=None, user=None, password=None):
@@ -94,18 +98,28 @@ class Neo4jClient:
         })
         """, file_id=file_id, filename=filename, link=link, type_document=type_document, timezone='UTC')
         
+        embedding_function = get_embedding_function()
+
         prev_chunk_id = None
         for chunk in chunks:
             page_number = chunk.metadata['page']
             c_id = f"{filename}+_{uuid.uuid4()}"
-            # text = chunk.page_content
-            text = summarize_chunk(chunk.page_content)
+            text = chunk.page_content # LƯU Ý: Biến này là full text
+            sumary_text = summarize_chunk(chunk.page_content) # Biến này là bản tóm tắt
+            content_embedding = embedding_function.embed_query(sumary_text) # Embedding của bản tóm tắt
 
             await tx.run("""
             MATCH (f:File {file_id: $file_id})
-            CREATE (c:Chunk {chunk_id: $chunk_id, text: $text, page_number: $page_number})
+            CREATE (c:Chunk {
+                chunk_id: $chunk_id,
+                text: $text,  
+                sumary_text: $sumary_text,     
+                content_embedding: $content_embedding,
+                page_number: $page_number
+            })
             CREATE (f)-[:HAS_CHUNK]->(c)
-            """, file_id=file_id, chunk_id=c_id, text=text, page_number=page_number,)
+            """,
+            file_id=file_id, chunk_id=c_id, text=text, sumary_text=sumary_text, content_embedding=content_embedding, page_number=page_number)
             
             # Link the previous chunk
             if prev_chunk_id is not None:
@@ -158,23 +172,25 @@ class Neo4jClient:
                 })
                 """, file_id=file_id, filename=filename, link=link, type_document=type_document, timezone='UTC')
                         
+        embedding_function = get_embedding_function()
+
         prev_chunk_id = None
         for chunk in chunks:
-            # Construct a unique chunk_id based on file_id and chunk["chunk_id"]
             c_id = f"{filename} ++_{uuid.uuid4()} "
-            # text = chunk.page_content
-            text = summarize_chunk(chunk.page_content)
-            print(chunk.page_content)
-            print("--------------------------------")
-            print("--------------------------------")
-            print(text)
-            print("++++++++++++++++++++++++++++++++")
+            text = chunk.page_content
+            sumary_text = summarize_chunk(chunk.page_content)
+            content_embedding = embedding_function.embed_query(sumary_text) # Embedding của bản tóm tắt
 
             await tx.run("""
             MATCH (f:File {file_id: $file_id})
-            CREATE (c:Chunk {chunk_id: $chunk_id, text: $text})
+            CREATE (c:Chunk {
+                chunk_id: $chunk_id,
+                text: $text,  
+                sumary_text: $sumary_text,       
+                content_embedding: $content_embedding
+            })
             CREATE (f)-[:HAS_CHUNK]->(c)
-            """, file_id=file_id, chunk_id=c_id, text=text)
+            """, file_id=file_id, chunk_id=c_id, text=text, sumary_text=sumary_text, content_embedding=content_embedding)
             
             # Link the previous chunk
             if prev_chunk_id is not None:

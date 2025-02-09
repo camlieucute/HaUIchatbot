@@ -23,46 +23,11 @@ from langchain.tools.retriever import create_retriever_tool
 print("✅✅call agent step")
 
 graph = get_graph_function()
-# @tool 
-# def explore_document(question: str) -> str:
 
-#     """
-#     Useful for answering questions about relevant information in the document. Use the entire prompt
-#     as input to the tool. When the question is general and hard to find keywords from the question.
-#     For example, if the prompt is "Tôi cần tìm thông tin về điều kiện gia nhập đoàn".
-
-#     For when you need to find information about movies based on a plot"
-#     """
-    
-#     result =  get_chunk(question)
-#     return result
-
-
-# @tool
-# def get_from_database(text: str) -> List[Dict[str, Any]]:
-#     """
-#     Useful query information from databse for answering questions about customers, products, brands, orders,
-#     customer reviews, sales statistics, and product availability. Use the entire prompt
-#     as input to the tool. Or give the overview about the product.
-#     Here is few example:
-#     1. What are the specifications and features of [product_name]
-#     2. How does [product_name] compare to other products in terms of sales?
-#     3. How many products does [brand_name] have listed in our marketplace?
-#     4. What are the most common complaints from customers about [brand_name]?
-#     5. Which products are trending in the [category]?
-#     """
-#     return cypher_summary()
-
-# retriever_tool = create_retriever_tool(
-#     get_chunk_retriever,
-#     "document search",
-#     "Search for information about the 'Đoàn thanh niên, hội sinh viên' . For any questions in the about 'Đoàn thành niên, hội sinh viên', you must use this tool!",
-# )
 @tool 
 def get_chunk_tool(question: str) -> str:
     "Search for information about the 'Đoàn thanh niên, hội sinh viên' . For any questions in the about 'Đoàn thành niên, hội sinh viên', you must use this tool!"
     result =  get_chunk_retriever().invoke(question)
-    # print(result)
     return result
 
 @tool
@@ -80,7 +45,6 @@ agent_tools = [
 
     get_chunk_tool,
     get_customer_service,
-    # get_from_database,
  
 ]
 def get_memory(session_id):
@@ -100,7 +64,6 @@ agent_prompt = ChatPromptTemplate.from_messages(
                 •	Câu trả lời phải sử dụng từ ngữ chính xác từ văn bản trong tài liệu, không được diễn giải lại hoặc thay đổi nội dung.
                 •	Giới hạn thông tin:
                 •	Nếu thông tin không có trong tài liệu, trả lời rằng “Tôi không có thông tin này” và khuyến nghị người dùng tham khảo nguồn khác.
-                •	Nếu câu hỏi không thuộc lĩnh vực Đoàn Thanh niên, thông báo rằng câu hỏi nằm ngoài phạm vi hỗ trợ.
 
             3. Hướng dẫn sử dụng công cụ:
                 LƯU Ý: Bạn phải sử dụng công cụ để truy vấn dữ liệu và trả lời dựa trên kết quả truy vấn đó
