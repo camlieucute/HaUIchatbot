@@ -1,4 +1,6 @@
 import os
+import time 
+import logging
 from langchain_neo4j import Neo4jVector
 from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -13,6 +15,9 @@ from langchain.prompts import (
 from dotenv import load_dotenv
 from llm.get_llm import get_embedding_function, get_model_function
 from llm.get_graph import get_graph_function
+
+
+logger = logging.getLogger(__name__)
 
 graph = get_graph_function()
 embedding_func = get_embedding_function()

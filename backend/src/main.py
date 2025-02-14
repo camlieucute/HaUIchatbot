@@ -15,6 +15,7 @@ from asyncio import TimeoutError, wait_for
 import uvicorn
 from fastapi import status
 from utils.load_html import get_content_from_url
+import time
 
 
 import os
@@ -271,7 +272,10 @@ async def ask_docs_agent(message: Message) -> ChatResponse:
     """
     try:
         # Call the agent with retry mechanism
+        start_time = time.time()
         query_response = await invoke_agent_with_retry(message)
+        end_time = time.time()
+        logger.info(f"Time taken to process the query: {end_time - start_time} seconds")
 
         if query_response is None:
             logger.error("invoke_agent_with_retry returned None after all retry attempts.")
