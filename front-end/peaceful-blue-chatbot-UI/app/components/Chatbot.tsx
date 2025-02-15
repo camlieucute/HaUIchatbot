@@ -101,21 +101,21 @@ export function Chatbot() {
                   onClick={() => setActiveSection("start")}
                 >
                   <Home className="mr-2" />
-                  <span>Bắt đầu</span>
+                  <span>Getting Started</span>
                 </SidebarMenuButton>
                 <SidebarMenuButton 
                   isActive={activeSection === "how-it-works"}
                   onClick={() => setActiveSection("how-it-works")}
                 >
                   <HelpCircle className="mr-2" />
-                  <span>Cách thức hoạt động?</span>
+                  <span>How it Works?</span>
                 </SidebarMenuButton>
                 <SidebarMenuButton 
                   isActive={activeSection === "about"}
                   onClick={() => setActiveSection("about")}
                 >
                   <Info className="mr-2" />
-                  <span>Giới thiệu về chatbot</span>
+                  <span>About the chatbot</span>
                 </SidebarMenuButton>
               </SidebarHeader>
               <SidebarSeparator />
@@ -127,7 +127,7 @@ export function Chatbot() {
                       onClick={() => setActiveSection("faq")}
                     >
                       <MessageCircleQuestion className="mr-2" />
-                      <span>FAQ (Câu hỏi thường gặp)</span>
+                      <span>FAQ (Frequently Asked Questions)</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
@@ -136,7 +136,7 @@ export function Chatbot() {
                       onClick={() => setActiveSection("settings")}
                     >
                       <Settings className="mr-2" />
-                      <span>Cài đặt</span>
+                      <span>Settings</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
