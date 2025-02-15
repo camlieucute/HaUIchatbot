@@ -47,8 +47,6 @@ neo4j_vector_index = Neo4jVector.from_existing_graph(
     """,
     
 )
-#current code
-
 
 
 chunk_retriever = neo4j_vector_index.as_retriever(search_type="similarity_score_threshold",
