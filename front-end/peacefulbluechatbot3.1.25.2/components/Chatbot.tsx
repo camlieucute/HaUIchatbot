@@ -8,11 +8,15 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import ReactMarkdown from "react-markdown"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism"
-import { Send, Loader2, User } from "lucide-react"
+import { Send, Loader2, User, Bot } from "lucide-react"
+import { format } from "date-fns"
+import { vi } from "date-fns/locale"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface Message {
   role: "user" | "assistant"
   content: string
+  timestamp: Date
 }
 
 const MarkdownComponents = {
@@ -80,29 +84,46 @@ export function Chatbot() {
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const scrollToBottom = useCallback(() => {
     if (scrollAreaRef.current) {
       const scrollContainer = scrollAreaRef.current.querySelector("[data-radix-scroll-area-viewport]")
       if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight
+        const scrollToPosition = scrollContainer.scrollHeight
+        scrollContainer.scrollTo({
+          top: scrollToPosition,
+          behavior: 'smooth'
+        })
       }
     }
   }, [])
 
   useEffect(() => {
-    scrollToBottom()
-  }, [scrollToBottom])
+    if (messages.length > 0) {
+      // Add a small delay to ensure the DOM has updated and animations are complete
+      const scrollTimeout = setTimeout(scrollToBottom, 150)
+      return () => clearTimeout(scrollTimeout)
+    }
+  }, [messages, scrollToBottom])
+  // Focus input on component mount
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [])
 
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return
 
-    const newMessages = [...messages, { role: "user", content: input }]
+    const newMessages = [...messages, { role: "user", content: input, timestamp: new Date() }]
     setMessages(newMessages)
     setInput("")
     setIsLoading(true)
+    scrollToBottom()
 
-    setMessages([...newMessages, { role: "assistant", content: "..." }])
+    setMessages([...newMessages, { role: "assistant", content: "...", timestamp: new Date() }])
+    scrollToBottom()
 
     try {
       const response = await fetch("https://qbadinh.onrender.com/docs-rag-agent", {
@@ -121,78 +142,96 @@ export function Chatbot() {
       }
 
       const data = await response.json()
-      setMessages([...newMessages, { role: "assistant", content: data.output }])
+      setMessages([...newMessages, { role: "assistant", content: data.output, timestamp: new Date() }])
+      scrollToBottom()
     } catch (error) {
       console.error("Error details:", error)
       let errorMessage = "Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại."
       if (error instanceof Error) {
         errorMessage += ` Chi tiết lỗi: ${error.message}`
       }
-      setMessages([...newMessages, { role: "assistant", content: errorMessage }])
+      setMessages([...newMessages, { role: "assistant", content: errorMessage, timestamp: new Date() }])
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <Card className="w-full h-full flex flex-col bg-white shadow-lg rounded-lg overflow-hidden">
+    <Card className="w-full h-full flex flex-col bg-gradient-to-b from-white to-gray-50 shadow-lg rounded-lg overflow-hidden border border-gray-200">
       <CardContent className="flex-1 overflow-hidden p-4 flex flex-col h-[calc(100vh-8rem)]">
         <ScrollArea className="flex-1 pr-2 mb-4" ref={scrollAreaRef}>
-          <div className="space-y-4">
-            {messages.map((message, index) => (
-              <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`flex items-start space-x-2 ${message.role === "user" ? "flex-row-reverse space-x-reverse" : ""}`}
+          <div className="space-y-6 py-4">
+            <AnimatePresence>
+              {messages.map((message, index) => (
+                <motion.div 
+                  key={index} 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  {message.role === "user" && (
-                    <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-                      <User className="w-5 h-5 text-white" />
-                    </div>
-                  )}
                   <div
-                    className={`max-w-[80%] p-3 rounded-lg shadow-md ${
-                      message.role === "user" ? "bg-gray-200 text-black" : "bg-gray-100 text-gray-800"
-                    }`}
+                    className={`flex items-start space-x-2 max-w-[85%] ${message.role === "user" ? "flex-row-reverse space-x-reverse" : ""}`}
                   >
-                    {message.content === "..." ? (
-                      <div className="flex items-center space-x-2">
-                        <div
-                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: "0s" }}
-                        ></div>
-                        <div
-                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: "0.2s" }}
-                        ></div>
-                        <div
-                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: "0.4s" }}
-                        ></div>
+                    {message.role === "user" ? (
+                      <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center shadow-md">
+                        <User className="w-5 h-5 text-white" />
                       </div>
                     ) : (
-                      <ReactMarkdown
-                        components={MarkdownComponents}
-                      >
-                        {message.content}
-                      </ReactMarkdown>
+                      <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center shadow-md">
+                        <Bot className="w-5 h-5 text-white" />
+                      </div>
                     )}
+                    <div className="flex flex-col">
+                      <div
+                        className={`p-3 rounded-2xl shadow-sm ${
+                          message.role === "user" 
+                            ? "bg-blue-500 text-white rounded-tr-none" 
+                            : "bg-white text-gray-800 rounded-tl-none border border-gray-100"
+                        }`}
+                      >
+                        {message.content === "..." ? (
+                          <div className="flex items-center space-x-2 px-2 py-1">
+                            <div className="typing-animation">
+                              <span></span>
+                              <span></span>
+                              <span></span>
+                            </div>
+                          </div>
+                        ) : (
+                          <ReactMarkdown
+                            components={MarkdownComponents}
+                          >
+                            {message.content}
+                          </ReactMarkdown>
+                        )}
+                      </div>
+                      <span className={`text-xs text-gray-500 mt-1 ${message.role === "user" ? "text-right" : "text-left"}`}>
+                        {format(message.timestamp, 'HH:mm', { locale: vi })}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
           <div ref={messagesEndRef} />
         </ScrollArea>
-        <div className="mt-2 flex items-center space-x-2">
+        <div className="mt-2 flex items-center space-x-2 bg-white p-2 rounded-lg border border-gray-200 shadow-sm">
           <Input
+            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
             placeholder="Nhập câu hỏi của bạn..."
             disabled={isLoading}
-            className="flex-1"
+            className="flex-1 border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
-          <Button onClick={handleSendMessage} disabled={isLoading}>
+          <Button 
+            onClick={handleSendMessage} 
+            disabled={isLoading}
+            className={`transition-all ${isLoading ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'}`}
+          >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </Button>
         </div>
