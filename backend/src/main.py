@@ -2,7 +2,6 @@
 
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Path, Body
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
 from neo4j_client import Neo4jClient
 import logging
 from typing import Optional

@@ -1,8 +1,5 @@
-from langchain_community.document_loaders import JSONLoader
-
 import json
 from pathlib import Path
-from pprint import pprint
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 def metadata_func(record: dict, metadata: dict) -> dict:

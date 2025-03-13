@@ -1,9 +1,7 @@
 from langchain_community.document_loaders import RecursiveUrlLoader
 import re
-from langchain_core.load import dumpd, dumps, load, loads
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from bs4 import BeautifulSoup
-import json
 import logging
 
 # Configure logging
@@ -23,7 +21,7 @@ def bs4_extractor(html: str) -> str:
 
         if target_element:
             # Extract text from the target element
-            text = target_element.get_text(separator=' ', strip=True)
+            text = target_element.get_text(separator = "", strip = True)
             # Replace multiple whitespace characters with a single space
             cleaned_text = re.sub(r'\s+', ' ', text)
             return cleaned_text

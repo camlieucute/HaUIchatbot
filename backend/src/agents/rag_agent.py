@@ -1,14 +1,9 @@
-import os
-import time
 import logging
-from typing import Any
-from langchain_openai import ChatOpenAI
 from langchain.agents import AgentExecutor, tool
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.agents.format_scratchpad.openai_tools import (
     format_to_openai_tool_messages,
 )
-from typing import List, Dict, Any
 from langchain.agents.output_parsers.openai_tools import OpenAIToolsAgentOutputParser
 from langchain_neo4j import Neo4jChatMessageHistory
 
@@ -18,7 +13,6 @@ from tools.tools import get_customer_service_infor
 from llm.get_llm import get_embedding_function, get_model_function
 from llm.get_graph import get_graph_function
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain.tools.retriever import create_retriever_tool
 
 
 logger = logging.getLogger(__name__)
@@ -26,19 +20,25 @@ print("✅✅call agent step")
 
 graph = get_graph_function()
 
-@tool 
+
+@tool
 def get_chunk_tool(question: str) -> str:
-    "Search for information about the 'Đoàn thanh niên, hội sinh viên' . For any questions in the about 'Đoàn thành niên, hội sinh viên', you must use this tool!"
-    result =  get_chunk_retriever().invoke(question)
+    """
+    Tìm kiếm thông tin về 'Đoàn thanh niên, hội sinh viên'. 
+    Đối với bất kỳ câu hỏi nào liên quan đến 'Đoàn thanh niên, hội sinh viên', hãy sử dụng công cụ này.
+    """
+    result = get_chunk_retriever().invoke(question)
     return result
+
 
 @tool
 def get_customer_service() -> str:
     """
-    When user ask or when you cannot anwser user's question. Use that tool to get contact information for customer service.
-    
-    Example:
-    "How can I contact customer service?"
+    Khi người dùng hỏi hoặc khi bạn không thể trả lời câu hỏi của họ, hãy sử dụng công cụ này
+    để lấy thông tin liên hệ với dịch vụ khách hàng.
+
+    Ví dụ:
+    "Tôi có thể liên hệ với dịch vụ khách hàng như thế nào?"
     """
     return get_customer_service_infor()
 
@@ -49,8 +49,20 @@ agent_tools = [
     get_customer_service,
  
 ]
+
+
 def get_memory(session_id):
+    """
+    Tạo bộ nhớ thoại liên quan đến phiên làm việc với `session_id` được chỉ định.
+    
+    Parameters:
+        session_id (str): ID của phiên làm việc.
+
+    Returns:
+        Neo4jChatMessageHistory: Đối tượng lưu trữ lịch sử chatbot.
+    """
     return Neo4jChatMessageHistory(session_id=session_id, graph=graph)
+
 
 agent_prompt = ChatPromptTemplate.from_messages(
     [
@@ -137,5 +149,14 @@ chat_agent = RunnableWithMessageHistory(
     input_messages_key="input",
     history_messages_key="chat_history",
 )
+
+
 def get_agent():
+    """
+    Lấy agent thực thi các chức năng tương tác của chatbot, bao gồm xử lý lịch sử hội thoại
+    và các công cụ được cung cấp.
+
+    Returns:
+        RunnableWithMessageHistory: Agent hỗ trợ lịch sử hội thoại và công cụ.
+    """
     return chat_agent

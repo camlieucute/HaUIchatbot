@@ -5,6 +5,9 @@ from typing import Any, List
 
 def get_customer_service_infor() -> str:
     """
-    Retrieve a review product for a 
+    Trả về thông tin liên hệ bộ phận hỗ trợ khách hàng
     """
-    return "Customer Service Phone: 0362 023 048, Email: thientn@fit-haui.edu.vn"
+    return """Thông tin liên hệ hỗ trợ:
+        - Điện thoại: 0362 023 048 (Giờ hành chính: 8h00 - 17h00 từ thứ 2 đến thứ 6)
+        - Email: thientn@fit-haui.edu.vn
+    """

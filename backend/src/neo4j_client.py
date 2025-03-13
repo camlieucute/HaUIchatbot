@@ -3,13 +3,13 @@ import os
 from dotenv import load_dotenv
 import uuid
 import logging
-import datetime
-import asyncio
 from langchain.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain.chains import LLMChain
-from llm.get_llm import get_embedding_function, get_model_function
+from llm.get_llm import get_embedding_function
 
+
+MODEL_NAME = "gpt-4o-mini"
 
 load_dotenv()
 
@@ -25,7 +25,7 @@ def summarize_chunk(chunk_content):
     :return: Kết quả tóm tắt (str)
     """
 
-    llm = ChatOpenAI(model_name="gpt-4o-mini", temperature=0.3)
+    llm = ChatOpenAI(model_name=MODEL_NAME, temperature=0.3)
 
     prompt_template = PromptTemplate(
         input_variables=["chunk"],
