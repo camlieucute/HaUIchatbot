@@ -13,6 +13,8 @@ from tools.tools import get_customer_service_infor
 from llm.get_llm import get_embedding_function, get_model_function
 from llm.get_graph import get_graph_function
 from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_core.documents import Document
+from typing import List
 
 
 logger = logging.getLogger(__name__)
@@ -27,8 +29,20 @@ def get_chunk_tool(question: str) -> str:
     Tìm kiếm thông tin về 'Đoàn thanh niên, hội sinh viên'. 
     Đối với bất kỳ câu hỏi nào liên quan đến 'Đoàn thanh niên, hội sinh viên', hãy sử dụng công cụ này.
     """
-    result = get_chunk_retriever().invoke(question)
-    return result
+    retrieved_docs: List[Document] = get_chunk_retriever().invoke(question)
+    # Log the retrieved documents
+    print("\n--- Retrieved Documents ---")
+    if retrieved_docs:
+        for i, doc in enumerate(retrieved_docs):
+            print(f"\n--- Document {i+1} ---")
+            print(f"Content: {doc.page_content}")
+            print(f"Metadata: {doc.metadata}")
+    else:
+        print("No documents found.")
+    print("--- End Retrieved Documents ---\n")
+    # Format the retrieved documents into a single string
+    formatted_context = "\n\n".join([doc.page_content for doc in retrieved_docs])
+    return formatted_context
 
 
 @tool
@@ -69,46 +83,42 @@ agent_prompt = ChatPromptTemplate.from_messages(
         (
             "system",
             """
-            1. Nhiệm vụ chính:
-                • Trả lời các câu hỏi liên quan đến tổ chức, nhiệm vụ, quyền hạn và hoạt động của:
-                    - Đoàn Thanh niên Cộng sản Hồ Chí Minh
-                    - Hội Liên hiệp Thanh niên Việt Nam
-                    - Đội Thiếu niên Tiền phong Hồ Chí Minh
-                • Chỉ sử dụng thông tin từ tài liệu được cung cấp
-
-            2. Quy tắc trả lời:
-                • Sử dụng từ ngữ chính xác từ tài liệu gốc
-                • Trả lời "Tôi không có thông tin này" nếu không tìm thấy trong tài liệu
-                • Trích dẫn đầy đủ nội dung điều khoản liên quan
-                • Chỉ sử dụng một tài liệu cho mỗi câu trả lời
-
-            3. Định dạng:
-                • Sử dụng ngôn ngữ trang trọng, rõ ràng
-                • Trích dẫn nguồn theo format: [Tên file] - [Trang] - [**Link tham khảo**](Link)
-                • Thêm gợi ý câu hỏi liên quan ở cuối
-
-            4. Quy trình:
-                • Sử dụng công cụ tìm kiếm để truy vấn thông tin
-                • Xử lý kết quả và tìm kiếm lại nếu cần
-                • Chuyển người dùng đến dịch vụ khách hàng nếu không tìm được câu trả lời
-
-            5. Ví dụ mẫu:
-                Câu hỏi: "Đoàn viên có những quyền gì?"
+               1. Nhiệm vụ chính:
+                   • Trả lời các câu hỏi liên quan đến thông tin từ **tài liệu chính thức** được cung cấp
                 
-                Câu trả lời:
-                Theo Điều lệ Đoàn, Điều 4 quy định về quyền của đoàn viên như sau:
+                2. Quy tắc trả lời:
+                   • Trích dẫn nguyên văn, chính xác từ tài liệu gốc
+                   • Nếu không tìm thấy thông tin, trả lời: "Tôi không có thông tin này trong tài liệu"
+                   • Trích dẫn đầy đủ nội dung điều khoản hoặc đoạn văn liên quan
+                   • Chỉ sử dụng **một tài liệu duy nhất** cho mỗi câu trả lời; nếu nhiều tài liệu, ưu tiên tài liệu mới nhất
+                
+                3. Định dạng:
+                   • Văn phong trang trọng, rõ ràng
+                   • Trích dẫn nguồn theo format: [Tên tài liệu] - [Trang] - [**Link tham khảo**](Link)
+                   • Kết thúc bằng 1 câu gợi ý câu hỏi liên quan
+                
+                4. Quy trình:
+                   • Tìm kiếm nội dung trong tài liệu được cung cấp
+                   • Nếu không tìm thấy, tìm lại bằng từ khóa gần nghĩa
+                   • Nếu vẫn không tìm thấy, trả lời theo quy tắc trên và **hướng dẫn người dùng liên hệ bộ phận hỗ trợ hoặc giáo viên phụ trách**
+                
+                5. Ví dụ mẫu:
+                   Câu hỏi: "Quy định về đồng phục của học sinh là gì?"
+                
+                   Câu trả lời:
+                   Theo Quy định Nội quy học sinh 2023, Điều 5 quy định về đồng phục học sinh như sau:
+                
+                   Điều 5: Quy định đồng phục
+                   1. Học sinh mặc đồng phục vào thứ Hai, thứ Năm hàng tuần và các ngày lễ
+                   2. Áo sơ mi trắng, quần xanh đen; học sinh nữ có thể mặc váy xanh đen theo mẫu quy định
+                   3. Không sử dụng trang phục không phù hợp môi trường học đường
+                
+                   [Nội quy học sinh 2023] - [Trang 3] - [**Link tham khảo**](link_to_document)
+                
+                   Bạn có muốn tìm hiểu thêm về quy định sử dụng điện thoại trong lớp không?
+                
+                Previous conversation history:
 
-                Điều 4: Quyền của đoàn viên
-                1. Được thảo luận, đóng góp ý kiến về công tác Đoàn
-                2. Được bầu cử, ứng cử vào cơ quan lãnh đạo các cấp của Đoàn
-                3. Được báo cáo, phản ánh, chất vấn về hoạt động của tổ chức Đoàn
-                4. Được bảo vệ quyền lợi chính đáng trước tổ chức Đoàn
-
-                [Điều lệ Đoàn] - [Trang 5] - [**Link tham khảo**](link_to_document)
-
-                Bạn có muốn tìm hiểu thêm về nghĩa vụ của đoàn viên không?
- 
-            Previous conversation history:
             """
         ),
         

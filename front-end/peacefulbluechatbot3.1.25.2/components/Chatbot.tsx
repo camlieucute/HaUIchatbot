@@ -126,7 +126,7 @@ export function Chatbot() {
     scrollToBottom()
 
     try {
-      const response = await fetch("https://qbadinh.onrender.com/docs-rag-agent", {
+      const response = await fetch("http://localhost:8000/docs-rag-agent", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

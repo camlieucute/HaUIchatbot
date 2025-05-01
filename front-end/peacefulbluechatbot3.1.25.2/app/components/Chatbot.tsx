@@ -30,39 +30,70 @@ export function Chatbot() {
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return
 
-    const newMessages = [...messages, { role: "user", content: input }]
+    console.log("Bắt đầu gửi tin nhắn, input:", input);
+    
+    const userMessage: Message = { role: "user", content: input }
+    const newMessages = [...messages, userMessage]
     setMessages(newMessages)
+    const currentInput = input; // Store input before clearing
     setInput("")
     setIsLoading(true)
+    // Removed scrollToBottom() here, will scroll after response
+
+    // Removed placeholder message addition
 
     try {
-      const response = await fetch("https://qbadinh-chatbot.onrender.com/", {
+      const apiUrl = "http://localhost:8000/docs-rag-agent";
+      console.log("Gọi API đến:", apiUrl, "với dữ liệu:", {
+        text: currentInput,
+        session: "default_session"
+      });
+      
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          text: input,
+          text: currentInput, // Use stored input
           session: "default_session",
         }),
       })
 
+      let assistantMessage: Message;
       if (response.ok) {
         const data = await response.json()
-        setMessages([...newMessages, { role: "assistant", content: data.output }])
+        assistantMessage = { role: "assistant", content: data.output }
       } else {
-        setMessages([
-          ...newMessages,
-          { role: "assistant", content: "Xin lỗi, tôi gặp lỗi khi xử lý yêu cầu của bạn. Vui lòng thử lại." },
-        ])
+         console.error("API Error:", response.status, await response.text()); // Log error details
+        assistantMessage = { role: "assistant", content: `Xin lỗi, tôi gặp lỗi (${response.status}) khi xử lý yêu cầu của bạn. Vui lòng thử lại.` }
       }
+      setMessages([...newMessages, assistantMessage])
+
     } catch (error) {
       console.error("Lỗi khi gửi tin nhắn:", error)
-      setMessages([...newMessages, { role: "assistant", content: "Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại." }])
+      const errorMessage: Message = { role: "assistant", content: "Xin lỗi, đã xảy ra lỗi kết nối. Vui lòng thử lại." }
+       if (error instanceof Error) {
+         errorMessage.content += ` Chi tiết: ${error.message}`;
+       }
+      setMessages([...newMessages, errorMessage])
     } finally {
       setIsLoading(false)
+      // Scroll to bottom after messages state is updated and component re-renders
+      // Use a slight delay to ensure DOM update before scrolling
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+      }, 0);
     }
   }
+
+  // Update useEffect to scroll when messages change
+  useEffect(() => {
+    // Use a slight delay to ensure DOM update before scrolling
+    setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+      }, 0);
+  }, [messages]);
 
   return (
     <Card className="w-full max-w-4xl mx-auto h-[calc(100vh-40px)] flex flex-col bg-blue-50 shadow-lg">
