@@ -6,7 +6,7 @@ from neo4j_client import Neo4jClient
 import logging
 from typing import Optional
 from contextlib import asynccontextmanager
-from agents.rag_agent import get_agent
+from agents.rag_agent import get_agent, ask_in_content
 from utils.load_pdf import chunk_text
 from models.schemas import Message, ChatResponse
 from utils.async_utils import async_retry1
@@ -15,6 +15,7 @@ import uvicorn
 from fastapi import status
 from utils.load_html import get_content_from_url
 import time
+from pydantic import BaseModel
 
 
 import os
@@ -45,7 +46,7 @@ async def lifespan(app: FastAPI):
 
 # Apply lifespan to the app
 app = FastAPI(
-    title="Lyli - Document Management & Chatbot API",
+    title="HaUI - Document Management & Chatbot API",
     description="Combined endpoints for document management and RAG chatbot",
     lifespan=lifespan
 )
@@ -232,6 +233,13 @@ async def delete_file(file_id: str):
 # Chatbot Endpoints
 # ============================
 
+class AskInContentRequest(BaseModel):
+    question: str
+    context: str
+
+class AskInContentResponse(BaseModel):
+    answer: str
+
 @async_retry1(max_retries=3, delay=1)
 async def invoke_agent_with_retry(message: Message, timeout: int = 30):
     """
@@ -317,6 +325,36 @@ async def ask_docs_agent(message: Message) -> ChatResponse:
             output=str(e)
         )
     
+
+@app.post("/ask-in-content", response_model=AskInContentResponse, summary="Answer question based on provided context")
+async def ask_with_context(request_data: AskInContentRequest = Body(...)):
+    """
+    Answer a question based on the provided context using the ask_in_content function.
+    """
+    try:
+        start_time = time.time()
+        answer = ask_in_content(question=request_data.question, context=request_data.context)
+        end_time = time.time()
+        logger.info(f"Time taken to process ask_in_content: {end_time - start_time} seconds")
+
+        if not answer:
+            logger.error("ask_in_content returned no answer.")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to get an answer from the provided context."
+            )
+        
+        return AskInContentResponse(answer=answer)
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logger.error(f"Unexpected error in ask_with_context: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)

@@ -5,6 +5,7 @@ from langchain.agents.format_scratchpad.openai_tools import (
     format_to_openai_tool_messages,
 )
 from langchain.agents.output_parsers.openai_tools import OpenAIToolsAgentOutputParser
+from langchain_core.output_parsers import StrOutputParser
 from langchain_neo4j import Neo4jChatMessageHistory
 
 from chains.semantic_search_chunk_chain import get_chunk_retriever
@@ -170,3 +171,31 @@ def get_agent():
         RunnableWithMessageHistory: Agent hỗ trợ lịch sử hội thoại và công cụ.
     """
     return chat_agent
+
+
+def ask_in_content(question: str, context: str) -> str:
+    """
+    Trả lời câu hỏi dựa trên nội dung được cung cấp.
+
+    Args:
+        question: Câu hỏi cần trả lời.
+        context: Nội dung để tìm kiếm câu trả lời.
+
+    Returns:
+        Câu trả lời từ mô hình ngôn ngữ.
+    """
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "Bạn là một trợ lý AI hữu ích. Chỉ sử dụng thông tin được cung cấp trong CONTEXT để trả lời câu hỏi. "
+                "Nếu thông tin không có trong CONTEXT, hãy trả lời là bạn không tìm thấy thông tin.",
+            ),
+            ("user", "CONTEXT:\n{context}\n\nQUESTION:\n{question}"),
+        ]
+    )
+    llm = get_model_function()
+    chain = prompt | llm | StrOutputParser()
+    
+    answer = chain.invoke({"question": question, "context": context})
+    return answer

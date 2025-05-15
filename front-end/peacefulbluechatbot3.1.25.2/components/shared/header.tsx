@@ -1,27 +1,26 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { MessageCircle } from "lucide-react"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { MessageCircle } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "Trang chủ" },
+  { href: "/news", label: "Điểm tin" },
   { href: "/getting-started", label: "Hướng dẫn" },
   { href: "/how-it-works", label: "Cách hoạt động" },
-]
+  { href: "/faq", label: "FAQ" },
+];
 
 export function Header() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
       <div className="container flex h-16 items-center justify-center space-x-8">
         <div className="flex items-center gap-6">
-          <Link 
-            href="/" 
-            className="flex items-center space-x-2 group"
-          >
+          <Link href="/" className="flex items-center space-x-2 group">
             <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 shadow-md group-hover:shadow-lg transition-all duration-300 transform group-hover:scale-105">
               <span className="text-xl text-white animate-pulse">🤖</span>
             </div>
@@ -35,9 +34,10 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 className={`relative transition-colors hover:text-foreground/80 px-2 py-1 rounded-md
-                  ${pathname === item.href
-                    ? "text-blue-600 font-bold bg-blue-50"
-                    : "text-foreground/60 hover:bg-gray-50"
+                  ${
+                    pathname === item.href
+                      ? "text-blue-600 font-bold bg-blue-50"
+                      : "text-foreground/60 hover:bg-gray-50"
                   }
                   before:content-[''] before:absolute before:bottom-0 before:left-0 before:w-full before:h-0.5 
                   before:bg-gradient-to-r before:from-purple-600 before:to-blue-500
@@ -65,5 +65,5 @@ export function Header() {
       {/* Decorative bottom border gradient */}
       <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-purple-500/20 to-transparent"></div>
     </header>
-  )
+  );
 }

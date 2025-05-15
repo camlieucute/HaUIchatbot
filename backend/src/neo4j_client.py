@@ -1,3 +1,4 @@
+import logger
 from neo4j import AsyncGraphDatabase
 import os
 from dotenv import load_dotenv
@@ -7,11 +8,16 @@ from langchain.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain.chains import LLMChain
 from llm.get_llm import get_embedding_function
-
+import smtplib
+from email.mime.text import MIMEText
 
 MODEL_NAME = "gpt-4o-mini"
 
 load_dotenv()
+
+if not os.getenv("OPENAI_API_KEY"):
+    logger.error("❌❌ OPENAI_API_KEY is missing. Environment file may not have loaded.")
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

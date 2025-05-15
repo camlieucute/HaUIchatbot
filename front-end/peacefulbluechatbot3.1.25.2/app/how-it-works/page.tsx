@@ -1,9 +1,13 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Image from "next/image"
-import { Header } from "@/components/shared/header"
+"use client";
+
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Header } from "@/components/shared/header";
 
 export default function HowItWorksPage() {
+  const router = useRouter();
   return (
     <>
       <Header />
@@ -14,8 +18,8 @@ export default function HowItWorksPage() {
             Chatbot Hoạt Động Như Thế Nào?
           </h1>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Khám phá cách chatbot của chúng tôi sử dụng công nghệ tiên tiến để hỗ trợ bạn 
-            trong các hoạt động Đoàn - Hội - Đội
+            Khám phá cách chatbot của chúng tôi sử dụng công nghệ tiên tiến để
+            hỗ trợ bạn trong các hoạt động của Trường Đại học Công nghiệp Hà Nội
           </p>
         </div>
 
@@ -29,8 +33,9 @@ export default function HowItWorksPage() {
               <div>
                 <h3 className="text-xl font-semibold mb-4">Mục đích</h3>
                 <p className="text-gray-600 mb-6">
-                  Chatbot được phát triển nhằm giải quyết nhu cầu tư vấn và hỗ trợ thông tin 
-                  về hoạt động Đoàn - Hội - Đội một cách nhanh chóng và hiệu quả.
+                  Chatbot được phát triển nhằm giải quyết nhu cầu tư vấn và hỗ
+                  trợ thông tin về hoạt động Đoàn - Hội - Đội một cách nhanh
+                  chóng và hiệu quả.
                 </p>
                 <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg">
                   <h4 className="font-semibold mb-3">Lợi ích nổi bật</h4>
@@ -69,7 +74,9 @@ export default function HowItWorksPage() {
 
         {/* Process Steps Section */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">2. Quy trình hoạt động theo bước</h2>
+          <h2 className="text-2xl font-bold mb-6">
+            2. Quy trình hoạt động theo bước
+          </h2>
           <div className="grid md:grid-cols-5 gap-4">
             {[
               {
@@ -77,36 +84,36 @@ export default function HowItWorksPage() {
                 title: "Nhập câu hỏi",
                 desc: "Người dùng nhập câu hỏi bằng ngôn ngữ tự nhiên",
                 icon: "💭",
-                color: "from-pink-50 to-red-50"
+                color: "from-pink-50 to-red-50",
               },
               {
                 step: "Bước 2",
                 title: "Xử lý NLP",
                 desc: "Hệ thống phân tích và hiểu ý định câu hỏi",
                 icon: "🧠",
-                color: "from-purple-50 to-pink-50"
+                color: "from-purple-50 to-pink-50",
               },
               {
                 step: "Bước 3",
                 title: "Tra cứu dữ liệu",
                 desc: "Tìm kiếm thông tin từ cơ sở dữ liệu",
                 icon: "🔍",
-                color: "from-blue-50 to-purple-50"
+                color: "from-blue-50 to-purple-50",
               },
               {
                 step: "Bước 4",
                 title: "Tạo phản hồi",
                 desc: "Xây dựng câu trả lời phù hợp",
                 icon: "⚙️",
-                color: "from-cyan-50 to-blue-50"
+                color: "from-cyan-50 to-blue-50",
               },
               {
                 step: "Bước 5",
                 title: "Phản hồi",
                 desc: "Gửi câu trả lời đến người dùng",
                 icon: "✨",
-                color: "from-green-50 to-cyan-50"
-              }
+                color: "from-green-50 to-cyan-50",
+              },
             ].map((step, i) => (
               <Card key={i} className={`bg-gradient-to-r ${step.color}`}>
                 <CardContent className="pt-6">
@@ -134,7 +141,9 @@ export default function HowItWorksPage() {
                 <div className="space-y-4">
                   <div className="bg-blue-100 p-4 rounded-lg">
                     <p className="text-sm font-medium">Người dùng:</p>
-                    <p>"Làm thế nào để đăng ký tham gia hoạt động tình nguyện?"</p>
+                    <p>
+                      "Làm thế nào để đăng ký tham gia hoạt động tình nguyện?"
+                    </p>
                   </div>
                   <div className="bg-green-100 p-4 rounded-lg">
                     <p className="text-sm font-medium">Chatbot:</p>
@@ -167,19 +176,22 @@ export default function HowItWorksPage() {
               <div className="bg-purple-50 p-6 rounded-lg">
                 <h3 className="font-semibold mb-3">🧠 Công nghệ NLP</h3>
                 <p className="text-gray-600">
-                  Sử dụng công nghệ xử lý ngôn ngữ tự nhiên tiên tiến để hiểu chính xác ý định người dùng
+                  Sử dụng công nghệ xử lý ngôn ngữ tự nhiên tiên tiến để hiểu
+                  chính xác ý định người dùng
                 </p>
               </div>
               <div className="bg-blue-50 p-6 rounded-lg">
                 <h3 className="font-semibold mb-3">🔄 Cập nhật liên tục</h3>
                 <p className="text-gray-600">
-                  Dữ liệu được cập nhật thường xuyên để đảm bảo thông tin luôn mới nhất
+                  Dữ liệu được cập nhật thường xuyên để đảm bảo thông tin luôn
+                  mới nhất
                 </p>
               </div>
               <div className="bg-green-50 p-6 rounded-lg">
                 <h3 className="font-semibold mb-3">📱 Đa nền tảng</h3>
                 <p className="text-gray-600">
-                  Tích hợp trên nhiều nền tảng: website, ứng dụng di động và mạng xã hội
+                  Tích hợp trên nhiều nền tảng: website, ứng dụng di động và
+                  mạng xã hội
                 </p>
               </div>
             </div>
@@ -189,7 +201,9 @@ export default function HowItWorksPage() {
         {/* Security Section */}
         <Card className="mb-12">
           <CardHeader>
-            <CardTitle className="text-2xl">5. Bảo mật và quyền riêng tư</CardTitle>
+            <CardTitle className="text-2xl">
+              5. Bảo mật và quyền riêng tư
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-8">
@@ -213,11 +227,12 @@ export default function HowItWorksPage() {
               <div className="bg-gray-50 p-6 rounded-lg">
                 <h3 className="font-semibold mb-4">Chính sách & Điều khoản</h3>
                 <div className="space-y-4">
-                  <Button variant="outline" className="w-full">
-                    Xem chính sách bảo mật
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    Xem điều khoản sử dụng
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => router.push("/privacy")}
+                  >
+                    Xem Chính sách và Điều khoản
                   </Button>
                 </div>
               </div>
@@ -228,7 +243,9 @@ export default function HowItWorksPage() {
         {/* Support Section */}
         <Card className="mb-12">
           <CardHeader>
-            <CardTitle className="text-2xl">6. Hỗ trợ và tài liệu thêm</CardTitle>
+            <CardTitle className="text-2xl">
+              6. Hỗ trợ và tài liệu thêm
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-8">
@@ -281,15 +298,17 @@ export default function HowItWorksPage() {
           <CardContent>
             <div className="text-center max-w-2xl mx-auto">
               <p className="text-gray-600 mb-6">
-                Hãy thử trải nghiệm chatbot ngay hôm nay và để lại góp ý cho chúng tôi để 
-                cải thiện hệ thống tốt hơn!
+                Hãy thử trải nghiệm chatbot ngay hôm nay và để lại góp ý cho
+                chúng tôi để cải thiện hệ thống tốt hơn!
               </p>
               <div className="space-x-4">
-                <Button size="lg" className="bg-purple-600 hover:bg-purple-700">
+                <Button
+                  size="lg"
+                  aria-label="Bắt đầu chat với chatbot"
+                  className="bg-purple-600 hover:bg-purple-700"
+                  onClick={() => router.push("/")}
+                >
                   Bắt đầu chat ngay
-                </Button>
-                <Button size="lg" variant="outline">
-                  Gửi góp ý
                 </Button>
               </div>
             </div>
@@ -297,5 +316,5 @@ export default function HowItWorksPage() {
         </Card>
       </div>
     </>
-  )
+  );
 }
